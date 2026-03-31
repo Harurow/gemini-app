@@ -9,6 +9,7 @@ export function Sidebar() {
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const setActiveSession = useChatStore((s) => s.setActiveSession);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
+  const unreadSessionIds = useAppStore((s) => s.unreadSessionIds);
   const { t } = useI18n();
 
   if (!sidebarOpen) return null;
@@ -104,6 +105,9 @@ export function Sidebar() {
                 </svg>
               )}
               <span className="text-sm truncate">{session.title || t('sidebar.newChat')}</span>
+              {unreadSessionIds.has(session.id) && (
+                <span className="w-2 h-2 rounded-full bg-purple-500 flex-shrink-0" />
+              )}
             </div>
             <button
               onClick={(e) => handleDeleteSession(e, session.id)}

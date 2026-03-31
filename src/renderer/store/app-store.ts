@@ -8,6 +8,7 @@ interface AppState {
   settingsOpen: boolean;
   sidebarOpen: boolean;
   initialized: boolean;
+  unreadSessionIds: Set<string>;
 
   setSessions: (sessions: SessionSummary[]) => void;
   addSession: (session: SessionSummary) => void;
@@ -16,6 +17,8 @@ interface AppState {
   setSettingsOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   setInitialized: (initialized: boolean) => void;
+  markUnread: (id: string) => void;
+  markRead: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -24,6 +27,7 @@ export const useAppStore = create<AppState>((set) => ({
   settingsOpen: false,
   sidebarOpen: true,
   initialized: false,
+  unreadSessionIds: new Set(),
 
   setSessions: (sessions) => set({ sessions }),
 
@@ -44,4 +48,18 @@ export const useAppStore = create<AppState>((set) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
 
   setInitialized: (initialized) => set({ initialized }),
+
+  markUnread: (id) =>
+    set((s) => {
+      const next = new Set(s.unreadSessionIds);
+      next.add(id);
+      return { unreadSessionIds: next };
+    }),
+
+  markRead: (id) =>
+    set((s) => {
+      const next = new Set(s.unreadSessionIds);
+      next.delete(id);
+      return { unreadSessionIds: next };
+    }),
 }));

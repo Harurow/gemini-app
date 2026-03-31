@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useChatStore } from '../store/chat-store';
+import { useAppStore } from '../store/app-store';
 import type { Message, ToolCallDisplay, Session } from '../types/chat';
 
 export function useChat() {
@@ -55,7 +56,14 @@ export function useChat() {
     // MCP host real-time events
     window.api.onMcpChatEvent((data: { sessionId: string; type: string; [key: string]: unknown }) => {
       const store = useChatStore.getState();
-      if (data.sessionId !== store.activeSessionId) return;
+
+      // Mark as unread if not currently viewing this session
+      if (data.sessionId !== store.activeSessionId) {
+        if (data.type === 'user-message' || data.type === 'stream-end') {
+          useAppStore.getState().markUnread(data.sessionId);
+        }
+        return;
+      }
 
       switch (data.type) {
         case 'user-message': {
@@ -111,6 +119,7 @@ export function useChat() {
 
   const loadSession = useCallback(async (sessionId: string) => {
     useChatStore.getState().setActiveSession(sessionId);
+    useAppStore.getState().markRead(sessionId);
     const session = (await window.api.getSession(sessionId)) as Session | null;
     if (!session) return;
 
