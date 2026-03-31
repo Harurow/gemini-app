@@ -30,6 +30,7 @@ export interface ElectronAPI {
   // Settings
   getSettings: () => Promise<unknown>;
   updateSettings: (settings: Record<string, unknown>) => Promise<unknown>;
+  getDefaults: () => Promise<{ chatTemplates: unknown[]; skills: unknown[] }>;
   validateApiKey: (key: string) => Promise<boolean>;
 
   // MCP (client)
@@ -93,6 +94,7 @@ const api: ElectronAPI = {
   // Settings
   getSettings: () => ipcRenderer.invoke('settings:get'),
   updateSettings: (settings) => ipcRenderer.invoke('settings:update', settings),
+  getDefaults: () => ipcRenderer.invoke('settings:get-defaults'),
   validateApiKey: (key) => ipcRenderer.invoke('settings:validate-key', key),
 
   // MCP (client)

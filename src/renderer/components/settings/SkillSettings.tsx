@@ -44,6 +44,16 @@ export function SkillSettings() {
     });
   };
 
+  const handleReset = async () => {
+    if (!confirm(t('settings.skills.resetConfirm'))) return;
+    const defs = await window.api.getDefaults();
+    const defaultSkills = defs.skills as Skill[];
+    setSkills(defaultSkills);
+    await updateSettings({ skills: defaultSkills } as Record<string, unknown>);
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
   const handleSaveEdit = async () => {
     if (!editing || !isRequired(editing.name)) return;
     const sanitized: Skill = {
@@ -164,9 +174,14 @@ export function SkillSettings() {
           </div>
         </div>
       ) : (
-        <Button onClick={handleAdd} variant="secondary" size="sm">
-          {t('settings.skills.add')}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAdd} variant="secondary" size="sm">
+            {t('settings.skills.add')}
+          </Button>
+          <Button onClick={handleReset} variant="ghost" size="sm">
+            {t('settings.skills.reset')}
+          </Button>
+        </div>
       )}
     </div>
   );

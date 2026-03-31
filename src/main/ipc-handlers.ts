@@ -6,7 +6,7 @@ import { mcpServerService } from './services/mcp-server.service';
 import { updateService } from './services/update.service';
 // OAuth removed — see ADR-009. API Key is the only auth method.
 import { toolRegistry } from './tools/tool-registry';
-import { getSettings, updateSettings, type AppSettings } from './store';
+import { getSettings, updateSettings, defaults, type AppSettings } from './store';
 
 export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void {
   // --- Tool confirmation ---
@@ -74,6 +74,10 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     }
 
     return updated;
+  });
+
+  ipcMain.handle('settings:get-defaults', async () => {
+    return { chatTemplates: defaults.chatTemplates, skills: defaults.skills };
   });
 
   ipcMain.handle('settings:validate-key', async (_, key: string) => {

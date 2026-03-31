@@ -58,7 +58,7 @@ export interface AppSettings {
   skills: Skill[];
 }
 
-const defaults: AppSettings = {
+export const defaults: AppSettings = {
   apiKey: '',
   defaultModel: 'gemini-3-flash-preview',
   systemInstruction: '',

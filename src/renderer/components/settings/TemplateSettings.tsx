@@ -42,6 +42,16 @@ export function TemplateSettings() {
     setExpanded(null);
   };
 
+  const handleReset = async () => {
+    if (!confirm(t('settings.templates.resetConfirm'))) return;
+    const defs = await window.api.getDefaults();
+    const defaultTemplates = defs.chatTemplates as Template[];
+    setTemplates(defaultTemplates);
+    await updateSettings({ chatTemplates: defaultTemplates });
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
   const handleSaveEdit = async () => {
     if (!editing || !isRequired(editing.name)) return;
     const sanitized: Template = {
@@ -193,9 +203,14 @@ export function TemplateSettings() {
         </div>
       ) : (
         !editing && (
-          <Button onClick={handleAdd} variant="secondary" size="sm">
-            {t('settings.templates.add')}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleAdd} variant="secondary" size="sm">
+              {t('settings.templates.add')}
+            </Button>
+            <Button onClick={handleReset} variant="ghost" size="sm">
+              {t('settings.templates.reset')}
+            </Button>
+          </div>
         )
       )}
     </div>
