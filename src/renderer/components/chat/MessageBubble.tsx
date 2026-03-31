@@ -48,6 +48,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               ))}
             </div>
           )}
+          {message.content.startsWith('/') && (
+            <div className="flex justify-end mb-1">
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/80 text-white text-[10px] font-medium">
+                /{message.content.split(/\s/)[0].slice(1)}
+              </span>
+            </div>
+          )}
           <div className={`px-4 py-3 rounded-2xl rounded-br-md ${bubbleBg} text-white`}>
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           </div>

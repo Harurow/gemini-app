@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useAppStore } from '../../store/app-store';
 import { useI18n } from '../../i18n';
 
 export interface FileAttachment {
@@ -36,10 +37,22 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [dragging, setDragging] = useState(false);
   const [sendCount, setSendCount] = useState(0);
+  const [skillMenuOpen, setSkillMenuOpen] = useState(false);
+  const [skillMenuIndex, setSkillMenuIndex] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
+  const settings = useAppStore((s) => s.settings);
   const { t } = useI18n();
+
+  // Skill autocomplete
+  const skills = useMemo(() => {
+    const all =
+      ((settings as Record<string, unknown>)?.skills as Array<{ id: string; name: string; description: string }>) || [];
+    if (!text.startsWith('/')) return [];
+    const query = text.slice(1).toLowerCase();
+    return all.filter((s) => s.id.includes(query) || s.name.toLowerCase().includes(query));
+  }, [text, settings]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -47,6 +60,16 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
   }, [text]);
+
+  // Open/close skill menu based on text
+  useEffect(() => {
+    if (text.startsWith('/') && skills.length > 0) {
+      setSkillMenuOpen(true);
+      setSkillMenuIndex(0);
+    } else {
+      setSkillMenuOpen(false);
+    }
+  }, [text, skills.length]);
 
   const processFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -96,7 +119,34 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
     setAttachments([]);
   };
 
+  const selectSkill = (skillId: string) => {
+    setText(`/${skillId} `);
+    setSkillMenuOpen(false);
+    textareaRef.current?.focus();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (skillMenuOpen && skills.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSkillMenuIndex((i) => (i + 1) % skills.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSkillMenuIndex((i) => (i - 1 + skills.length) % skills.length);
+        return;
+      }
+      if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+        e.preventDefault();
+        selectSkill(skills[skillMenuIndex].id);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setSkillMenuOpen(false);
+        return;
+      }
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -232,6 +282,27 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
                 </button>
                 <div className="text-[9px] text-gray-400 mt-0.5 truncate w-16 text-center">{formatSize(att.size)}</div>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Skill autocomplete dropdown */}
+        {skillMenuOpen && skills.length > 0 && (
+          <div className="mb-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
+            {skills.map((skill, i) => (
+              <button
+                key={skill.id}
+                onClick={() => selectSkill(skill.id)}
+                className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm transition-colors ${
+                  i === skillMenuIndex
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <code className="text-xs text-gray-400 font-mono">/{skill.id}</code>
+                <span className="font-medium">{skill.name}</span>
+                <span className="text-xs text-gray-400 truncate">{skill.description}</span>
+              </button>
             ))}
           </div>
         )}
