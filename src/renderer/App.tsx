@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { ChatView } from './components/chat/ChatView';
 import { SettingsModal } from './components/settings/SettingsModal';
@@ -13,6 +13,9 @@ import { useTheme } from './hooks/useTheme';
 import { useI18n } from './i18n';
 
 const DEFAULT_ICON = 'M13 10V3L4 14h7v7l9-11h-7z';
+
+// Module-level guard: App IPC listeners must be registered exactly once
+let appIpcRegistered = false;
 
 function WelcomeScreen() {
   const { createSession } = useSessions();
@@ -117,10 +120,9 @@ export default function App() {
     init();
   }, [loadSettings, loadSessions, setInitialized, setSettingsOpen]);
 
-  const appListenersRegistered = useRef(false);
   useEffect(() => {
-    if (appListenersRegistered.current) return;
-    appListenersRegistered.current = true;
+    if (appIpcRegistered) return;
+    appIpcRegistered = true;
 
     const reloadSessions = async () => {
       const list = (await window.api.listSessions()) as import('../types/chat').SessionSummary[];

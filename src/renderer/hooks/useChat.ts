@@ -1,7 +1,10 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useChatStore } from '../store/chat-store';
 import { useAppStore } from '../store/app-store';
 import type { Message, ToolCallDisplay, Session } from '../types/chat';
+
+// Module-level guard: IPC listeners must be registered exactly once
+let ipcListenersRegistered = false;
 
 export function useChat() {
   const activeSessionId = useChatStore((s) => s.activeSessionId);
@@ -10,11 +13,10 @@ export function useChat() {
   const streamingText = useChatStore((s) => s.streamingText);
   const pendingToolCalls = useChatStore((s) => s.pendingToolCalls);
   const error = useChatStore((s) => s.error);
-  const listenersRegistered = useRef(false);
 
   useEffect(() => {
-    if (listenersRegistered.current) return;
-    listenersRegistered.current = true;
+    if (ipcListenersRegistered) return;
+    ipcListenersRegistered = true;
 
     window.api.onStreamChunk((chunk: string) => {
       useChatStore.getState().appendStreamChunk(chunk);
