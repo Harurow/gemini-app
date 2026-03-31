@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { ChatView } from './components/chat/ChatView';
 import { SettingsModal } from './components/settings/SettingsModal';
@@ -117,24 +117,27 @@ export default function App() {
     init();
   }, [loadSettings, loadSessions, setInitialized, setSettingsOpen]);
 
+  const appListenersRegistered = useRef(false);
   useEffect(() => {
-    window.api.onOpenSettings(() => setSettingsOpen(true));
+    if (appListenersRegistered.current) return;
+    appListenersRegistered.current = true;
+
+    const reloadSessions = async () => {
+      const list = (await window.api.listSessions()) as import('../types/chat').SessionSummary[];
+      useAppStore.getState().setSessions(list);
+    };
+
+    window.api.onOpenSettings(() => useAppStore.getState().setSettingsOpen(true));
     window.api.onNewChat(async () => {
       const session = await window.api.createSession();
       const s = session as { id: string };
       useChatStore.getState().setActiveSession(s.id);
-      loadSessions();
+      reloadSessions();
     });
     window.api.onSessionUpdated(() => {
-      loadSessions();
+      reloadSessions();
     });
-
-    return () => {
-      window.api.removeAllListeners('app:open-settings');
-      window.api.removeAllListeners('app:new-chat');
-      window.api.removeAllListeners('session:updated');
-    };
-  }, [setSettingsOpen, loadSessions]);
+  }, []);
 
   if (!initialized) {
     return (
