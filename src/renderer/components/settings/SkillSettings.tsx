@@ -36,7 +36,7 @@ export function SkillSettings() {
 
   const handleAdd = () => {
     setEditing({
-      id: `skill_${Date.now()}`,
+      id: '',
       name: '',
       description: '',
       steps: '',
@@ -60,8 +60,11 @@ export function SkillSettings() {
     }
   };
 
+  const isNewSkill = editing && !skills.some((s) => s.id === editing.id);
+
   const handleSaveEdit = async () => {
     if (!editing || !isRequired(editing.name)) return;
+    if (!editing.id || !/^[a-z0-9-]+$/.test(editing.id)) return;
     const sanitized: Skill = {
       ...editing,
       name: sanitizeWithLimit(editing.name, LIMITS.name),
@@ -150,6 +153,25 @@ export function SkillSettings() {
 
       {editing ? (
         <div className="p-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/10 space-y-2">
+          {isNewSkill && (
+            <div>
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-xs text-gray-500">/</span>
+                <input
+                  value={editing.id}
+                  onChange={(e) =>
+                    setEditing({ ...editing, id: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })
+                  }
+                  placeholder={t('settings.skills.id')}
+                  maxLength={30}
+                  className="flex-1 px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {editing.id && skills.some((s) => s.id === editing.id) && (
+                <p className="text-xs text-red-500">{t('settings.skills.idDuplicate')}</p>
+              )}
+            </div>
+          )}
           <input
             value={editing.name}
             onChange={(e) => setEditing({ ...editing, name: e.target.value })}
@@ -170,7 +192,13 @@ export function SkillSettings() {
             className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="flex items-center gap-2">
-            <Button onClick={handleSaveEdit} size="sm" disabled={!isRequired(editing?.name)}>
+            <Button
+              onClick={handleSaveEdit}
+              size="sm"
+              disabled={
+                !isRequired(editing?.name) || !editing?.id || (isNewSkill && skills.some((s) => s.id === editing?.id))
+              }
+            >
               {t('settings.apiKey.save')}
             </Button>
             <Button onClick={() => setEditing(null)} variant="ghost" size="sm">
