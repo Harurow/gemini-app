@@ -53,6 +53,9 @@ export interface ElectronAPI {
     releaseName?: string;
   }>;
 
+  // MCP chat events (real-time updates from MCP host)
+  onMcpChatEvent: (callback: (data: { sessionId: string; type: string; [key: string]: unknown }) => void) => void;
+
   // Tool confirmation
   onToolConfirmRequest: (callback: (data: { id: string; name: string; args: Record<string, unknown> }) => void) => void;
   respondToolConfirm: (id: string, approved: boolean) => Promise<void>;
@@ -103,6 +106,9 @@ const api: ElectronAPI = {
 
   // Update check
   checkForUpdate: () => ipcRenderer.invoke('update:check'),
+
+  // MCP chat events
+  onMcpChatEvent: (cb) => ipcRenderer.on('mcp:chat-event', (_, data) => cb(data)),
 
   // Tool confirmation
   onToolConfirmRequest: (cb) => ipcRenderer.on('tool:confirm-request', (_, data) => cb(data)),

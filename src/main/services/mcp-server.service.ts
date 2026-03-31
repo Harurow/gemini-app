@@ -22,11 +22,14 @@ interface McpSession {
   server: McpServer;
 }
 
-function notifySessionUpdate(sessionId: string, title: string): void {
-  const windows = BrowserWindow.getAllWindows();
-  for (const win of windows) {
-    win.webContents.send('session:updated', { id: sessionId, title });
+function broadcast(channel: string, data: unknown): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send(channel, data);
   }
+}
+
+function notifySessionUpdate(sessionId: string, title: string): void {
+  broadcast('session:updated', { id: sessionId, title });
 }
 
 class McpServerService {
@@ -311,6 +314,14 @@ class McpServerService {
 
         const settings = getSettings();
 
+        // UI にユーザーメッセージを即座に表示
+        broadcast('mcp:chat-event', {
+          sessionId,
+          type: 'user-message',
+          text,
+          attachments: attachments?.map((a) => ({ name: a.name, mimeType: a.mimeType })),
+        });
+
         try {
           let responseText = '';
           const toolCalls: Array<{ name: string; duration: number }> = [];
@@ -323,18 +334,24 @@ class McpServerService {
             toolRegistry,
             onChunk: (chunk) => {
               responseText += chunk;
+              broadcast('mcp:chat-event', { sessionId, type: 'stream-chunk', chunk });
             },
             onFinalizeChunk: () => {
-              /* MCP ではストリーミングしない */
+              broadcast('mcp:chat-event', { sessionId, type: 'stream-finalize' });
             },
             onToolCall: (info) => {
               console.log(`[MCP Server] Tool call: ${info.name}`);
+              broadcast('mcp:chat-event', { sessionId, type: 'tool-call', name: info.name, args: info.args });
             },
             onToolResult: (info) => {
               console.log(`[MCP Server] Tool result: ${info.name} (${info.duration}ms)`);
               toolCalls.push({ name: info.name, duration: info.duration || 0 });
+              broadcast('mcp:chat-event', { sessionId, type: 'tool-result', name: info.name, duration: info.duration });
             },
           });
+
+          // 完了通知
+          broadcast('mcp:chat-event', { sessionId, type: 'stream-end' });
 
           // セッションにメッセージを保存
           const updatedSession = await sessionService.appendMessages(sessionId, newContents);
