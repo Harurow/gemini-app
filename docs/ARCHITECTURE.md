@@ -122,3 +122,4 @@ MCP Client (Claude Code 等)
 | 017 | 保存フィードバック統一 | Accepted |
 | 018 | MCP サーバーホスト機能 | Accepted |
 | 019 | import 漏れによる白画面の防止 | Accepted |
+| 020 | IPC リスナー管理と removeAllListeners 禁止 | Accepted |

@@ -51,6 +51,60 @@ export function useChat() {
     window.api.onUsage((usage) => {
       useChatStore.getState().setUsage(usage);
     });
+
+    // MCP host real-time events
+    window.api.onMcpChatEvent((data: { sessionId: string; type: string; [key: string]: unknown }) => {
+      const store = useChatStore.getState();
+      if (data.sessionId !== store.activeSessionId) return;
+
+      switch (data.type) {
+        case 'user-message': {
+          const userMsg: Message = {
+            id: `mcp_user_${Date.now()}`,
+            role: 'user',
+            content: data.text as string,
+            attachments: data.attachments as Array<{ name: string; mimeType: string }>,
+            timestamp: Date.now(),
+          };
+          store.addMessage(userMsg);
+          store.setStreaming(true);
+          break;
+        }
+        case 'tool-call': {
+          const tc: ToolCallDisplay = {
+            id: `mcp_tc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+            name: data.name as string,
+            args: (data.args as Record<string, unknown>) || {},
+            status: 'running',
+          };
+          store.addToolCall(tc);
+          break;
+        }
+        case 'tool-result': {
+          const pending = store.pendingToolCalls;
+          const match = [...pending].reverse().find((tc) => tc.name === data.name && tc.status === 'running');
+          if (match) {
+            store.updateToolResult(match.id, null, undefined, data.duration as number);
+          }
+          break;
+        }
+        case 'stream-chunk': {
+          store.appendStreamChunk(data.chunk as string);
+          break;
+        }
+        case 'stream-finalize': {
+          if (store.streamingText) {
+            store.finalizeStream();
+            useChatStore.setState({ isStreaming: true });
+          }
+          break;
+        }
+        case 'stream-end': {
+          store.finalizeStream();
+          break;
+        }
+      }
+    });
   }, []);
 
   const sessionOrigin = useChatStore((s) => s.sessionOrigin);

@@ -3,6 +3,7 @@ export const locales = {
     // App
     'app.name': 'Gemini Desktop',
     'app.loading': '読み込み中...',
+    'header.mcpServer.running': 'MCP サーバー稼働中',
     'update.available': '新しいバージョン v{version} が利用可能です',
     'update.download': 'ダウンロード',
 
@@ -176,6 +177,7 @@ export const locales = {
     // App
     'app.name': 'Gemini Desktop',
     'app.loading': 'Loading...',
+    'header.mcpServer.running': 'MCP Server running',
     'update.available': 'New version v{version} is available',
     'update.download': 'Download',
 

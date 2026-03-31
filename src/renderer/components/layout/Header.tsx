@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/app-store';
 import { useChatStore } from '../../store/chat-store';
+import { useI18n } from '../../i18n';
 
 export function Header() {
   const settings = useAppStore((s) => s.settings);
@@ -8,9 +9,18 @@ export function Header() {
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const [cwd, setCwd] = useState('');
+  const [mcpServerRunning, setMcpServerRunning] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     window.api.getCwd().then(setCwd);
+    // Check MCP server status
+    const checkStatus = () => {
+      window.api.getMcpServerStatus().then((s) => setMcpServerRunning(s.running));
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // Shorten path: /Users/foo/code/project → ~/code/project
@@ -55,7 +65,17 @@ export function Header() {
         )}
       </div>
 
-      <div className="w-8" />
+      <div className="flex items-center gap-2 titlebar-no-drag">
+        {mcpServerRunning && (
+          <span
+            className="flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400"
+            title={t('header.mcpServer.running')}
+          >
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            MCP
+          </span>
+        )}
+      </div>
     </div>
   );
 }
