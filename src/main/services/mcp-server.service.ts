@@ -25,17 +25,19 @@ class McpServerService {
   private httpServer: http.Server | null = null;
   private sessions = new Map<string, McpSession>();
   private port = 3100;
+  private bindAddress = '127.0.0.1';
   private isRunning = false;
 
   /**
    * MCP サーバーを起動
    */
-  async start(port: number = 3100): Promise<void> {
+  async start(port: number = 3100, host: 'localhost' | 'lan' = 'localhost'): Promise<void> {
     if (this.isRunning) {
       await this.stop();
     }
 
     this.port = port;
+    this.bindAddress = host === 'lan' ? '0.0.0.0' : '127.0.0.1';
 
     this.httpServer = http.createServer(async (req, res) => {
       try {
@@ -50,9 +52,9 @@ class McpServerService {
     });
 
     return new Promise((resolve, reject) => {
-      this.httpServer!.listen(port, '127.0.0.1', () => {
+      this.httpServer!.listen(port, this.bindAddress, () => {
         this.isRunning = true;
-        console.log(`[MCP Server] Listening on http://127.0.0.1:${port}/mcp`);
+        console.log(`[MCP Server] Listening on http://${this.bindAddress}:${port}/mcp`);
         resolve();
       });
 
@@ -95,10 +97,11 @@ class McpServerService {
   /**
    * ステータス取得
    */
-  getStatus(): { running: boolean; port: number; sessionCount: number } {
+  getStatus(): { running: boolean; port: number; host: string; sessionCount: number } {
     return {
       running: this.isRunning,
       port: this.port,
+      host: this.bindAddress,
       sessionCount: this.sessions.size,
     };
   }

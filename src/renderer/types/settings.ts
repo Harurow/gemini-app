@@ -11,6 +11,7 @@ export interface McpServerConfig {
 export interface McpServerSettings {
   enabled: boolean;
   port: number;
+  host: 'localhost' | 'lan';
 }
 
 export interface AppSettings {

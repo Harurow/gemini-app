@@ -115,6 +115,9 @@ export const locales = {
     'settings.mcpServer.stopped': '停止中',
     'settings.mcpServer.endpoint': 'エンドポイント',
     'settings.mcpServer.sessions': 'アクティブセッション: {n}',
+    'settings.mcpServer.hostLabel': 'アクセス範囲',
+    'settings.mcpServer.lanWarning':
+      'LAN モードでは同じネットワーク上の全デバイスからアクセス可能になります。信頼できるネットワークでのみ使用してください。',
     'settings.mcpServer.portError': 'ポート番号は 1024〜65535 の範囲で指定してください',
     'settings.mcpServer.tools': '公開ツール: send_message, create_session, list_sessions, get_session',
 
@@ -284,6 +287,9 @@ export const locales = {
     'settings.mcpServer.stopped': 'Stopped',
     'settings.mcpServer.endpoint': 'Endpoint',
     'settings.mcpServer.sessions': 'Active sessions: {n}',
+    'settings.mcpServer.hostLabel': 'Access scope',
+    'settings.mcpServer.lanWarning':
+      'LAN mode allows access from all devices on the same network. Use only on trusted networks.',
     'settings.mcpServer.portError': 'Port must be between 1024 and 65535',
     'settings.mcpServer.tools': 'Tools: send_message, create_session, list_sessions, get_session',
 

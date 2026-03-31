@@ -65,9 +65,9 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
 
     // Manage MCP server host
     if (partial.mcpServerHost !== undefined) {
-      const mcpHost = partial.mcpServerHost as { enabled: boolean; port: number };
+      const mcpHost = partial.mcpServerHost as { enabled: boolean; port: number; host: 'localhost' | 'lan' };
       if (mcpHost.enabled) {
-        await mcpServerService.start(mcpHost.port).catch(console.error);
+        await mcpServerService.start(mcpHost.port, mcpHost.host).catch(console.error);
       } else {
         await mcpServerService.stop().catch(console.error);
       }
@@ -219,9 +219,12 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     return mcpServerService.getStatus();
   });
 
-  ipcMain.handle('mcp-server:start', async (_, port?: number) => {
+  ipcMain.handle('mcp-server:start', async (_, port?: number, host?: 'localhost' | 'lan') => {
     const settings = getSettings();
-    await mcpServerService.start(port || settings.mcpServerHost?.port || 3100);
+    await mcpServerService.start(
+      port || settings.mcpServerHost?.port || 3100,
+      host || settings.mcpServerHost?.host || 'localhost',
+    );
     return mcpServerService.getStatus();
   });
 
@@ -246,6 +249,6 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
 
   // Auto-start MCP server if enabled
   if (settings.mcpServerHost?.enabled) {
-    mcpServerService.start(settings.mcpServerHost.port).catch(console.error);
+    mcpServerService.start(settings.mcpServerHost.port, settings.mcpServerHost.host).catch(console.error);
   }
 }

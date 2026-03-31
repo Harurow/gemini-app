@@ -43,6 +43,7 @@ export type ChatTemplate = PromptTemplate;
 export interface McpServerSettings {
   enabled: boolean;
   port: number;
+  host: 'localhost' | 'lan';
 }
 
 export interface AppSettings {
@@ -63,7 +64,7 @@ const defaults: AppSettings = {
   systemInstruction: '',
   theme: 'system',
   mcpServers: [],
-  mcpServerHost: { enabled: false, port: 3100 },
+  mcpServerHost: { enabled: false, port: 3100, host: 'localhost' },
   sidebarWidth: 280,
   chatTemplates: [
     {
@@ -199,6 +200,8 @@ export function getSettings(): AppSettings {
   // Ensure mcpServerHost exists (migration from old settings)
   if (!settings.mcpServerHost) {
     settings.mcpServerHost = defaults.mcpServerHost;
+  } else if (!settings.mcpServerHost.host) {
+    settings.mcpServerHost.host = 'localhost';
   }
   return settings;
 }

@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import { useI18n } from '../../i18n';
-import { Button } from '../common/Button';
 import { Spinner } from '../common/Spinner';
 
 interface McpServerStatus {
   running: boolean;
   port: number;
+  host: string;
   sessionCount: number;
 }
 
 export function McpServerSettings() {
   const { settings, updateSettings } = useSettings();
   const { t } = useI18n();
-  const [status, setStatus] = useState<McpServerStatus>({ running: false, port: 3100, sessionCount: 0 });
+  const [status, setStatus] = useState<McpServerStatus>({
+    running: false,
+    port: 3100,
+    host: '127.0.0.1',
+    sessionCount: 0,
+  });
   const [port, setPort] = useState('3100');
+  const [host, setHost] = useState<'localhost' | 'lan'>('localhost');
   const [portError, setPortError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
@@ -23,11 +29,12 @@ export function McpServerSettings() {
     loadStatus();
     if (settings?.mcpServerHost) {
       setPort(String(settings.mcpServerHost.port || 3100));
+      setHost(settings.mcpServerHost.host || 'localhost');
     }
   }, [settings]);
 
   const loadStatus = async () => {
-    const s = await window.api.getMcpServerStatus();
+    const s = (await window.api.getMcpServerStatus()) as McpServerStatus;
     setStatus(s);
   };
 
@@ -41,18 +48,26 @@ export function McpServerSettings() {
     return true;
   };
 
+  const save = async (overrides: Partial<{ enabled: boolean; port: number; host: 'localhost' | 'lan' }> = {}) => {
+    const current = settings?.mcpServerHost;
+    const newSettings = {
+      enabled: overrides.enabled ?? current?.enabled ?? false,
+      port: (overrides.port ?? Number(port)) || 3100,
+      host: overrides.host ?? host,
+    };
+    await updateSettings({ mcpServerHost: newSettings });
+    await loadStatus();
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
   const handleToggle = async () => {
     const enabled = !settings?.mcpServerHost?.enabled;
-    const portNum = Number(port) || 3100;
-
     if (enabled && !validatePort(port)) return;
 
     setLoading(true);
     try {
-      await updateSettings({ mcpServerHost: { enabled, port: portNum } });
-      await loadStatus();
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      await save({ enabled });
     } finally {
       setLoading(false);
     }
@@ -60,11 +75,12 @@ export function McpServerSettings() {
 
   const handlePortBlur = async () => {
     if (!validatePort(port)) return;
-    const portNum = Number(port);
-    const enabled = settings?.mcpServerHost?.enabled ?? false;
-    await updateSettings({ mcpServerHost: { enabled, port: portNum } });
-    setSaveStatus('saved');
-    setTimeout(() => setSaveStatus('idle'), 2000);
+    await save({ port: Number(port) });
+  };
+
+  const handleHostChange = async (newHost: 'localhost' | 'lan') => {
+    setHost(newHost);
+    await save({ host: newHost });
   };
 
   const isEnabled = settings?.mcpServerHost?.enabled ?? false;
@@ -96,6 +112,48 @@ export function McpServerSettings() {
             />
           )}
         </button>
+      </div>
+
+      {/* Host selection */}
+      <div>
+        <label className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+          {t('settings.mcpServer.hostLabel')}
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleHostChange('localhost')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              host === 'localhost'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                : 'border-gray-300 dark:border-gray-600 text-gray-500 hover:border-gray-400'
+            }`}
+          >
+            localhost
+          </button>
+          <button
+            onClick={() => handleHostChange('lan')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              host === 'lan'
+                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                : 'border-gray-300 dark:border-gray-600 text-gray-500 hover:border-gray-400'
+            }`}
+          >
+            LAN
+          </button>
+        </div>
+        {host === 'lan' && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-start gap-1.5">
+            <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+            <span>{t('settings.mcpServer.lanWarning')}</span>
+          </p>
+        )}
       </div>
 
       {/* Port */}
@@ -131,7 +189,7 @@ export function McpServerSettings() {
         {status.running && (
           <>
             <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-              {t('settings.mcpServer.endpoint')}: http://127.0.0.1:{status.port}/mcp
+              {t('settings.mcpServer.endpoint')}: http://{status.host}:{status.port}/mcp
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
               {t('settings.mcpServer.sessions', { n: status.sessionCount })}

@@ -37,9 +37,12 @@ export interface ElectronAPI {
   restartMcp: () => Promise<unknown[]>;
 
   // MCP Server (host)
-  getMcpServerStatus: () => Promise<{ running: boolean; port: number; sessionCount: number }>;
-  startMcpServer: (port?: number) => Promise<{ running: boolean; port: number; sessionCount: number }>;
-  stopMcpServer: () => Promise<{ running: boolean; port: number; sessionCount: number }>;
+  getMcpServerStatus: () => Promise<{ running: boolean; port: number; host: string; sessionCount: number }>;
+  startMcpServer: (
+    port?: number,
+    host?: string,
+  ) => Promise<{ running: boolean; port: number; host: string; sessionCount: number }>;
+  stopMcpServer: () => Promise<{ running: boolean; port: number; host: string; sessionCount: number }>;
 
   // Update check
   checkForUpdate: () => Promise<{
@@ -95,7 +98,7 @@ const api: ElectronAPI = {
 
   // MCP Server (host)
   getMcpServerStatus: () => ipcRenderer.invoke('mcp-server:status'),
-  startMcpServer: (port) => ipcRenderer.invoke('mcp-server:start', port),
+  startMcpServer: (port, host) => ipcRenderer.invoke('mcp-server:start', port, host),
   stopMcpServer: () => ipcRenderer.invoke('mcp-server:stop'),
 
   // Update check
