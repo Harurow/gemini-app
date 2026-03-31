@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { BrowserWindow } from 'electron';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
@@ -19,6 +20,13 @@ interface McpSession {
   sessionId: string;
   transport: StreamableHTTPServerTransport;
   server: McpServer;
+}
+
+function notifySessionUpdate(sessionId: string, title: string): void {
+  const windows = BrowserWindow.getAllWindows();
+  for (const win of windows) {
+    win.webContents.send('session:updated', { id: sessionId, title });
+  }
 }
 
 class McpServerService {
@@ -305,6 +313,7 @@ class McpServerService {
 
         try {
           let responseText = '';
+          const toolCalls: Array<{ name: string; duration: number }> = [];
           const newContents = await geminiService.sendMessage({
             model: session.model || settings.defaultModel,
             message: text,
@@ -323,14 +332,27 @@ class McpServerService {
             },
             onToolResult: (info) => {
               console.log(`[MCP Server] Tool result: ${info.name} (${info.duration}ms)`);
+              toolCalls.push({ name: info.name, duration: info.duration || 0 });
             },
           });
 
           // セッションにメッセージを保存
-          await sessionService.appendMessages(sessionId, newContents);
+          const updatedSession = await sessionService.appendMessages(sessionId, newContents);
+
+          // UI にセッション更新を通知 (サイドバー反映)
+          if (updatedSession) {
+            notifySessionUpdate(updatedSession.id, updatedSession.title);
+          }
+
+          // ツール実行があった場合は詳細を付加
+          let result = responseText || '(応答なし)';
+          if (toolCalls.length > 0) {
+            const toolSummary = toolCalls.map((tc) => `  - ${tc.name} (${tc.duration}ms)`).join('\n');
+            result += `\n\n---\n[実行されたツール]\n${toolSummary}`;
+          }
 
           return {
-            content: [{ type: 'text' as const, text: responseText || '(応答なし)' }],
+            content: [{ type: 'text' as const, text: result }],
           };
         } catch (error: unknown) {
           const errorMsg = error instanceof Error ? error.message : String(error);
@@ -357,6 +379,9 @@ class McpServerService {
         if (systemInstruction) {
           await sessionService.update(session.id, { systemInstruction });
         }
+
+        // UI にセッション作成を通知 (サイドバー反映)
+        notifySessionUpdate(session.id, session.title || 'New Chat');
 
         return {
           content: [
