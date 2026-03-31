@@ -141,9 +141,51 @@ export function SkillSettings() {
               </div>
               {isExpanded && (
                 <div className="px-3 pb-3 border-t border-gray-100 dark:border-gray-800">
-                  <pre className="text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded mt-2 whitespace-pre-wrap max-h-[150px] overflow-y-auto scrollbar-thin">
-                    {skill.steps}
-                  </pre>
+                  {editing?.id === skill.id ? (
+                    <div className="space-y-2 mt-2">
+                      <input
+                        value={editing.name}
+                        onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                        placeholder={t('settings.skills.name')}
+                        className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        value={editing.description}
+                        onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                        placeholder={t('settings.skills.desc')}
+                        className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <textarea
+                        value={editing.steps}
+                        onChange={(e) => setEditing({ ...editing, steps: e.target.value })}
+                        placeholder={t('settings.skills.instruction')}
+                        rows={5}
+                        className="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button onClick={handleSaveEdit} size="sm" disabled={!isRequired(editing?.name)}>
+                          {t('settings.apiKey.save')}
+                        </Button>
+                        <Button onClick={() => setEditing(null)} variant="ghost" size="sm">
+                          {t('settings.cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <pre className="text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded mt-2 whitespace-pre-wrap max-h-[150px] overflow-y-auto scrollbar-thin">
+                        {skill.steps}
+                      </pre>
+                      {!skill.builtIn && (
+                        <button
+                          onClick={() => setEditing({ ...skill })}
+                          className="text-xs text-blue-500 hover:text-blue-600 mt-2"
+                        >
+                          {t('settings.templates.edit')}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
