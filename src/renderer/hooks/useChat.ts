@@ -101,6 +101,35 @@ export function useChat() {
         }
         case 'stream-end': {
           store.finalizeStream();
+          // Reload session from store to get consistent state
+          const sid = store.activeSessionId;
+          if (sid) {
+            window.api.getSession(sid).then((session) => {
+              if (!session) return;
+              const s = session as Session;
+              const msgs: Message[] = [];
+              for (const content of s.messages) {
+                if (content.role === 'user') {
+                  const textPart = content.parts?.find((p) => p.text);
+                  if (textPart?.text) {
+                    msgs.push({
+                      id: `user_${msgs.length}`,
+                      role: 'user',
+                      content: textPart.text,
+                      timestamp: Date.now(),
+                    });
+                  }
+                } else if (content.role === 'model') {
+                  const textParts = content.parts?.filter((p) => p.text) || [];
+                  const text = textParts.map((p) => p.text).join('');
+                  if (text) {
+                    msgs.push({ id: `model_${msgs.length}`, role: 'model', content: text, timestamp: Date.now() });
+                  }
+                }
+              }
+              useChatStore.getState().setMessages(msgs);
+            });
+          }
           break;
         }
       }
