@@ -28,11 +28,21 @@ A macOS desktop chat application using the Google Gemini API. Provides the core 
 - Japanese/English UI
 - macOS .app packaging
 
-## Setup
+## Install
+
+1. Download ZIP from [Releases](https://github.com/Harurow/gemini-app/releases)
+2. Extract and drag `Gemini Desktop.app` to Applications
+3. **First time only**: Run in Terminal (removes macOS Gatekeeper quarantine for unsigned app):
+   ```bash
+   xattr -cr "/Applications/Gemini Desktop.app"
+   ```
+4. Launch the app
+
+## Development
 
 ```bash
-npm install
-npm start          # Development
+npm install        # Install dependencies
+npm start          # Development server
 npm run make       # Build .app
 npm test           # Run tests
 npm run lint       # OXLint
@@ -55,16 +65,16 @@ Enable in Settings > MCP Host tab. Exposes the app as an MCP server so external 
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|-----------|
-| Desktop | Electron + Electron Forge + Vite |
-| UI | React 19 + TypeScript |
-| Styling | Tailwind CSS v3 |
-| State | Zustand |
-| AI SDK | @google/genai |
-| MCP | @modelcontextprotocol/sdk |
-| Lint | OXLint + Prettier |
-| Test | Vitest (coverage > 80%) |
+| Category | Technology                       |
+| -------- | -------------------------------- |
+| Desktop  | Electron + Electron Forge + Vite |
+| UI       | React 19 + TypeScript            |
+| Styling  | Tailwind CSS v3                  |
+| State    | Zustand                          |
+| AI SDK   | @google/genai                    |
+| MCP      | @modelcontextprotocol/sdk        |
+| Lint     | OXLint + Prettier                |
+| Test     | Vitest (coverage > 80%)          |
 
 ## Documentation
 
