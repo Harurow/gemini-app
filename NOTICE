@@ -1,0 +1,19 @@
+Gemini Desktop
+Copyright 2026 Harurow (https://github.com/Harurow)
+
+This product is a derivative work based on Google Gemini CLI
+(https://github.com/google-gemini/gemini-cli), licensed under the
+Apache License, Version 2.0.
+
+Original work Copyright 2025 Google LLC.
+
+Modifications from the original work:
+- Ported CLI functionality to Electron desktop GUI application
+- Added React-based chat interface
+- Added i18n support (Japanese/English)
+- Added voice input, file attachments, chat templates
+- Replaced Ink terminal UI with web-based renderer
+- Modified tool system for GUI interaction (confirmation dialogs)
+- Added token usage tracking and display
+
+This product includes software developed by Google LLC.
