@@ -46,12 +46,18 @@ export function SkillSettings() {
 
   const handleReset = async () => {
     if (!confirm(t('settings.skills.resetConfirm'))) return;
-    const defs = await window.api.getDefaults();
-    const defaultSkills = defs.skills as Skill[];
-    setSkills(defaultSkills);
-    await updateSettings({ skills: defaultSkills } as Record<string, unknown>);
-    setSaveStatus('saved');
-    setTimeout(() => setSaveStatus('idle'), 2000);
+    try {
+      const defs = await window.api.getDefaults();
+      const defaultSkills = defs.skills as Skill[];
+      await updateSettings({ skills: defaultSkills } as Record<string, unknown>);
+      setSkills(defaultSkills);
+      setEditing(null);
+      setExpanded(null);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (e) {
+      console.error('Reset failed:', e);
+    }
   };
 
   const handleSaveEdit = async () => {

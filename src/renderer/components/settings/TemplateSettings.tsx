@@ -44,12 +44,18 @@ export function TemplateSettings() {
 
   const handleReset = async () => {
     if (!confirm(t('settings.templates.resetConfirm'))) return;
-    const defs = await window.api.getDefaults();
-    const defaultTemplates = defs.chatTemplates as Template[];
-    setTemplates(defaultTemplates);
-    await updateSettings({ chatTemplates: defaultTemplates });
-    setSaveStatus('saved');
-    setTimeout(() => setSaveStatus('idle'), 2000);
+    try {
+      const defs = await window.api.getDefaults();
+      const defaultTemplates = defs.chatTemplates as Template[];
+      await updateSettings({ chatTemplates: defaultTemplates });
+      setTemplates(defaultTemplates);
+      setEditing(null);
+      setExpanded(null);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (e) {
+      console.error('Reset failed:', e);
+    }
   };
 
   const handleSaveEdit = async () => {
