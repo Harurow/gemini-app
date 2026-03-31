@@ -53,10 +53,15 @@ export function useChat() {
     });
   }, []);
 
+  const sessionOrigin = useChatStore((s) => s.sessionOrigin);
+
   const loadSession = useCallback(async (sessionId: string) => {
     useChatStore.getState().setActiveSession(sessionId);
     const session = (await window.api.getSession(sessionId)) as Session | null;
     if (!session) return;
+
+    // Track session origin
+    useChatStore.setState({ sessionOrigin: (session as Session & { origin?: string }).origin || 'local' });
 
     const msgs: Message[] = [];
     for (const content of session.messages) {
@@ -120,6 +125,7 @@ export function useChat() {
     pendingToolCalls,
     error,
     activeSessionId,
+    sessionOrigin,
     sendMessage,
     cancel,
     loadSession,

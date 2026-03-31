@@ -10,6 +10,7 @@ export interface UsageInfo {
 
 interface ChatState {
   activeSessionId: string | null;
+  sessionOrigin: string;
   messages: Message[];
   isStreaming: boolean;
   streamingText: string;
@@ -32,6 +33,7 @@ interface ChatState {
 
 export const useChatStore = create<ChatState>((set, get) => ({
   activeSessionId: null,
+  sessionOrigin: 'local',
   messages: [],
   isStreaming: false,
   streamingText: '',
@@ -39,7 +41,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   error: null,
   usage: null,
 
-  setActiveSession: (id) => set({ activeSessionId: id, messages: [], error: null, usage: null }),
+  setActiveSession: (id) =>
+    set({ activeSessionId: id, sessionOrigin: 'local', messages: [], error: null, usage: null }),
 
   setMessages: (messages) => set({ messages }),
 

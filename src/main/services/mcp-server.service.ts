@@ -375,10 +375,10 @@ class McpServerService {
       async ({ model, systemInstruction }) => {
         const settings = getSettings();
         const session = await sessionService.create(model || settings.defaultModel);
-
-        if (systemInstruction) {
-          await sessionService.update(session.id, { systemInstruction });
-        }
+        await sessionService.update(session.id, {
+          ...(systemInstruction ? { systemInstruction } : {}),
+          origin: 'mcp',
+        });
 
         // UI にセッション作成を通知 (サイドバー反映)
         notifySessionUpdate(session.id, session.title || 'New Chat');

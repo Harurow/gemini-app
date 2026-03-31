@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Message } from '../../types/chat';
+import { useChatStore } from '../../store/chat-store';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { ToolCallBlock } from './ToolCallBlock';
 
@@ -8,7 +9,13 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
+  const sessionOrigin = useChatStore((s) => s.sessionOrigin);
+  const isMcp = sessionOrigin === 'mcp';
+
   if (message.role === 'user') {
+    const bubbleBg = isMcp ? 'bg-purple-600' : 'bg-blue-600';
+    const badgeBg = isMcp ? 'bg-purple-500/80' : 'bg-blue-500/80';
+
     return (
       <div className="flex justify-end mb-4">
         <div className="max-w-[80%]">
@@ -16,7 +23,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           {message.attachments && message.attachments.length > 0 && (
             <div className="flex gap-1.5 justify-end mb-1.5">
               {message.attachments.map((att, i) => (
-                <div key={i} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/80 text-white text-xs">
+                <div key={i} className={`flex items-center gap-1 px-2 py-1 rounded-lg ${badgeBg} text-white text-xs`}>
                   {att.mimeType.startsWith('image/') ? (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -41,7 +48,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               ))}
             </div>
           )}
-          <div className="px-4 py-3 rounded-2xl rounded-br-md bg-blue-600 text-white">
+          <div className={`px-4 py-3 rounded-2xl rounded-br-md ${bubbleBg} text-white`}>
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           </div>
         </div>

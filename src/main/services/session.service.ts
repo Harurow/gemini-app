@@ -11,6 +11,7 @@ export interface Session {
   updatedAt: string;
   model: string;
   systemInstruction?: string;
+  origin?: 'local' | 'mcp';
   messages: Content[];
 }
 
@@ -21,6 +22,7 @@ export interface SessionSummary {
   updatedAt: string;
   model: string;
   messageCount: number;
+  origin?: 'local' | 'mcp';
 }
 
 class SessionService {
@@ -58,6 +60,7 @@ class SessionService {
           updatedAt: session.updatedAt,
           model: session.model,
           messageCount: session.messages.length,
+          origin: session.origin,
         });
       } catch {
         // Skip corrupted files

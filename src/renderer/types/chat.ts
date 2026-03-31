@@ -24,6 +24,7 @@ export interface SessionSummary {
   updatedAt: string;
   model: string;
   messageCount: number;
+  origin?: 'local' | 'mcp';
 }
 
 export interface Session {
@@ -32,6 +33,7 @@ export interface Session {
   createdAt: string;
   updatedAt: string;
   model: string;
+  origin?: 'local' | 'mcp';
   messages: Array<{
     role: string;
     parts: Array<{ text?: string; functionCall?: unknown; functionResponse?: unknown }>;

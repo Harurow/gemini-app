@@ -36,16 +36,30 @@ export function ChatView() {
     pendingToolCalls,
     error,
     activeSessionId,
+    sessionOrigin,
     sendMessage,
     cancel,
     loadSession,
   } = useChat();
+
+  const isMcpSession = sessionOrigin === 'mcp';
 
   useEffect(() => {
     if (activeSessionId) {
       loadSession(activeSessionId);
     }
   }, [activeSessionId, loadSession]);
+
+  // Reload messages when session is updated via MCP
+  useEffect(() => {
+    const handler = (data: { id: string }) => {
+      if (data.id === activeSessionId && !isStreaming) {
+        loadSession(data.id);
+      }
+    };
+    window.api.onSessionUpdated(handler);
+    return () => window.api.removeAllListeners('session:updated');
+  }, [activeSessionId, isStreaming, loadSession]);
 
   // Escape key cancels streaming/skill execution
   useEffect(() => {
@@ -75,7 +89,7 @@ export function ChatView() {
 
       <UsageBar />
 
-      <ChatInput onSend={sendMessage} onCancel={cancel} isStreaming={isStreaming} />
+      {!isMcpSession && <ChatInput onSend={sendMessage} onCancel={cancel} isStreaming={isStreaming} />}
     </div>
   );
 }
