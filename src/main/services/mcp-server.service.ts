@@ -391,9 +391,10 @@ class McpServerService {
       },
       async ({ model, systemInstruction }) => {
         const settings = getSettings();
+        const effectiveInstruction = systemInstruction || settings.systemInstruction || '';
         const session = await sessionService.create(model || settings.defaultModel);
         await sessionService.update(session.id, {
-          ...(systemInstruction ? { systemInstruction } : {}),
+          systemInstruction: effectiveInstruction || undefined,
           origin: 'mcp',
         });
 
