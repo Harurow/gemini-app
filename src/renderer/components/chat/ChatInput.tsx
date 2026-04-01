@@ -126,6 +126,9 @@ export function ChatInput({ onSend, onCancel, isStreaming, disabled }: ChatInput
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // IME 変換中は無視
+    if (e.nativeEvent.isComposing) return;
+
     if (skillMenuOpen && skills.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
