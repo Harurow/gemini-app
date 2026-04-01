@@ -123,3 +123,4 @@ MCP Client (Claude Code 等)
 | 018 | MCP サーバーホスト機能 | Accepted |
 | 019 | import 漏れによる白画面の防止 | Accepted |
 | 020 | IPC リスナー管理と removeAllListeners 禁止 | Accepted |
+| 021 | IME 変換中の Enter 送信防止 | Accepted |
