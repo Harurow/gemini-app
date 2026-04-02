@@ -55,6 +55,10 @@ export function useChat() {
       useChatStore.getState().setUsage(usage);
     });
 
+    window.api.onModelChange((model: string) => {
+      useChatStore.setState({ activeModel: model });
+    });
+
     // MCP host real-time events
     window.api.onMcpChatEvent((data: { sessionId: string; type: string; [key: string]: unknown }) => {
       const store = useChatStore.getState();

@@ -8,6 +8,7 @@ export function Header() {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
+  const activeModel = useChatStore((s) => s.activeModel);
   const [cwd, setCwd] = useState('');
   const [mcpServerRunning, setMcpServerRunning] = useState(false);
   const { t } = useI18n();
@@ -54,7 +55,7 @@ export function Header() {
         {activeSessionId && (
           <>
             <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-              {settings?.defaultModel || 'gemini-3-flash-preview'}
+              {activeModel || settings?.defaultModel || 'gemini-3-flash-preview'}
             </span>
             {cwd && (
               <span className="text-[10px] text-gray-400 dark:text-gray-600 truncate max-w-[200px]" title={cwd}>

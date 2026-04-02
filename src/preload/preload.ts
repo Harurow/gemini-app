@@ -16,6 +16,7 @@ export interface ElectronAPI {
   onUsage: (
     callback: (usage: { inputTokens: number; outputTokens: number; totalTokens: number; apiCalls: number }) => void,
   ) => void;
+  onModelChange: (callback: (model: string) => void) => void;
   cancelStream: () => Promise<{ success: boolean }>;
 
   // Sessions
@@ -80,6 +81,7 @@ const api: ElectronAPI = {
   onToolCall: (cb) => ipcRenderer.on('chat:tool-call', (_, info) => cb(info)),
   onToolResult: (cb) => ipcRenderer.on('chat:tool-result', (_, info) => cb(info)),
   onUsage: (cb) => ipcRenderer.on('chat:usage', (_, usage) => cb(usage)),
+  onModelChange: (cb) => ipcRenderer.on('chat:model-change', (_, model) => cb(model)),
   cancelStream: () => ipcRenderer.invoke('chat:cancel'),
 
   // Sessions

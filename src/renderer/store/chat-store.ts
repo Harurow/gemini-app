@@ -17,6 +17,7 @@ interface ChatState {
   pendingToolCalls: ToolCallDisplay[];
   error: string | null;
   usage: UsageInfo | null;
+  activeModel: string | null;
 
   setActiveSession: (id: string | null) => void;
   setMessages: (messages: Message[]) => void;
@@ -40,6 +41,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   pendingToolCalls: [],
   error: null,
   usage: null,
+  activeModel: null,
 
   setActiveSession: (id) =>
     set({ activeSessionId: id, sessionOrigin: 'local', messages: [], error: null, usage: null }),

@@ -12,6 +12,15 @@ interface ModelInfo {
 
 const MODELS: ModelInfo[] = [
   {
+    id: 'auto',
+    name: 'Auto',
+    desc: {
+      ja: '内容に応じて Pro / Flash を自動選択 (推奨)',
+      en: 'Auto-routes between Pro / Flash based on complexity (Recommended)',
+    },
+    tag: 'stable',
+  },
+  {
     id: 'gemini-3.1-pro-preview',
     name: 'Gemini 3.1 Pro',
     desc: {

@@ -9,6 +9,20 @@ import type { ToolCallInfo, ToolResultInfo } from '../tools/tool-types';
 import type { ToolRegistry } from '../tools/tool-registry';
 import { initWebSearchClient } from '../tools/web-search.tool';
 
+// Auto model routing: classifier prompt
+const AUTO_CLASSIFIER_PROMPT = `You are a model router. Based on the user's request, decide which model to use.
+Reply with ONLY "pro" or "flash" (no other text).
+
+Use "pro" for: complex reasoning, math, code generation, analysis, planning, creative writing
+Use "flash" for: simple questions, translations, summaries, factual lookups, casual conversation
+
+User request:
+`;
+
+const AUTO_PRO_MODEL = 'gemini-2.5-pro';
+const AUTO_FLASH_MODEL = 'gemini-2.5-flash';
+const AUTO_CLASSIFIER_MODEL = 'gemini-2.5-flash-lite-preview-06-17';
+
 // Model fallback chain: if rate limited, try next model
 const MODEL_FALLBACK: Record<string, string> = {
   'gemini-3.1-pro-preview': 'gemini-3-flash-preview',
@@ -51,6 +65,7 @@ export class GeminiService {
     onToolCall: (info: ToolCallInfo) => void;
     onToolResult: (info: ToolResultInfo) => void;
     onUsage?: (usage: { inputTokens: number; outputTokens: number; totalTokens: number; apiCalls: number }) => void;
+    onModelChange?: (model: string) => void;
   }): Promise<Content[]> {
     if (!this.client) {
       throw new Error('API キーが未設定です。設定画面で Gemini API キーを設定してください。');
@@ -68,7 +83,24 @@ export class GeminiService {
       onToolCall,
       onToolResult,
       onUsage,
+      onModelChange,
     } = options;
+
+    // Auto model routing: classify with Flash Lite → pick Pro or Flash
+    if (model === 'auto') {
+      try {
+        const classifierResponse = await this.client.models.generateContent({
+          model: AUTO_CLASSIFIER_MODEL,
+          contents: AUTO_CLASSIFIER_PROMPT + message,
+        });
+        const decision = (classifierResponse.text || '').trim().toLowerCase();
+        model = decision.includes('pro') ? AUTO_PRO_MODEL : AUTO_FLASH_MODEL;
+      } catch {
+        model = AUTO_FLASH_MODEL; // fallback to flash on error
+      }
+      console.log(`[Gemini] Auto routing → ${model}`);
+      if (onModelChange) onModelChange(model);
+    }
 
     this.abortController = new AbortController();
     let totalInputTokens = 0;

@@ -184,6 +184,9 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
           onUsage: (usage) => {
             win.webContents.send('chat:usage', usage);
           },
+          onModelChange: (resolvedModel) => {
+            win.webContents.send('chat:model-change', resolvedModel);
+          },
         });
 
         // Persist messages

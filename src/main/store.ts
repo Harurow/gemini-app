@@ -61,7 +61,7 @@ export interface AppSettings {
 
 export const defaults: AppSettings = {
   apiKey: '',
-  defaultModel: 'gemini-3-flash-preview',
+  defaultModel: 'auto',
   systemInstruction: '',
   theme: 'system',
   mcpServers: [],
