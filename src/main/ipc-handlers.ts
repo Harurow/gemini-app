@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, shell } from 'electron';
 import { geminiService } from './services/gemini.service';
 import { sessionService } from './services/session.service';
 import { mcpService } from './services/mcp.service';
@@ -21,6 +21,11 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     return new Promise<boolean>((resolve) => {
       pendingConfirms.set(id, resolve);
       win.webContents.send('tool:confirm-request', { id, name, args });
+
+      // 通知音
+      if (getSettings().notificationSound) {
+        shell.beep();
+      }
 
       // Auto-approve after 60s timeout
       setTimeout(() => {

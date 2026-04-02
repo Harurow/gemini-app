@@ -21,6 +21,7 @@ export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   mcpServers: McpServerConfig[];
   mcpServerHost: McpServerSettings;
+  notificationSound: boolean;
   sidebarWidth: number;
 }
 

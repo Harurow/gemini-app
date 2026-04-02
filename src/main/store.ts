@@ -54,6 +54,7 @@ export interface AppSettings {
   mcpServers: McpServerConfig[];
   mcpServerHost: McpServerSettings;
   sidebarWidth: number;
+  notificationSound: boolean;
   chatTemplates: PromptTemplate[];
   skills: Skill[];
 }
@@ -65,6 +66,7 @@ export const defaults: AppSettings = {
   theme: 'system',
   mcpServers: [],
   mcpServerHost: { enabled: false, port: 3100, host: 'localhost' },
+  notificationSound: true,
   sidebarWidth: 280,
   chatTemplates: [
     {

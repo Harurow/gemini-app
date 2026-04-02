@@ -57,6 +57,28 @@ export function ThemeSettings() {
         </div>
       </div>
 
+      {/* Notification Sound */}
+      <div>
+        <label className="block text-sm font-medium mb-2">{t('settings.notificationSound.title')}</label>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {t('settings.notificationSound.description')}
+          </span>
+          <button
+            onClick={() => updateSettings({ notificationSound: !settings?.notificationSound })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              settings?.notificationSound ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                settings?.notificationSound ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* Language */}
       <div>
         <label className="block text-sm font-medium mb-2">{t('settings.language.title')}</label>
