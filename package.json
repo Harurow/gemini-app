@@ -12,6 +12,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "make:dmg": "electron-forge package && npx appdmg resources/appdmg.json out/GeminiDesktop.dmg",
     "publish": "electron-forge publish",
     "lint": "oxlint src/",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",

@@ -19,8 +19,17 @@ const config: ForgeConfig = {
     new MakerDMG({
       name: 'Gemini Desktop',
       icon: 'resources/icon.icns',
+      format: 'ULFO',
+      overwrite: true,
       additionalDMGOptions: {
+        title: 'Gemini Desktop',
+        background: 'resources/dmg-background.png',
+        'icon-size': 72,
         window: { size: { width: 540, height: 380 } },
+        contents: [
+          { x: 140, y: 160, type: 'file', path: '' },
+          { x: 400, y: 160, type: 'link', path: '/Applications' },
+        ],
       },
     }),
   ],

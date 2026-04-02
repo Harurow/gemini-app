@@ -1,0 +1,13 @@
+{
+  "title": "Gemini Desktop",
+  "icon": "icon.icns",
+  "background": "dmg-background.png",
+  "icon-size": 72,
+  "window": {
+    "size": { "width": 540, "height": 380 }
+  },
+  "contents": [
+    { "x": 140, "y": 160, "type": "file", "path": "../out/Gemini Desktop-darwin-arm64/Gemini Desktop.app" },
+    { "x": 400, "y": 160, "type": "link", "path": "/Applications" }
+  ]
+}
