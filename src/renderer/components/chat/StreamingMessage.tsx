@@ -81,10 +81,12 @@ export function StreamingMessage({ text, toolCalls }: StreamingMessageProps) {
             <ToolCallBlock key={tc.id} toolCall={tc} />
           ))}
 
-        {/* Active status indicator */}
-        {!text && <StatusIndicator toolCalls={toolCalls} />}
+        {/* Active status indicator (only when no running tool blocks) */}
+        {!text && toolCalls.every((tc) => tc.status === 'completed' || tc.status === 'error') && (
+          <StatusIndicator toolCalls={[]} />
+        )}
 
-        {/* Running tool calls */}
+        {/* Running tool calls with status */}
         {toolCalls
           .filter((tc) => tc.status === 'running' || tc.status === 'pending')
           .map((tc) => (
