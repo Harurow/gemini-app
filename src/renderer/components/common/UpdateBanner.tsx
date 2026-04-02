@@ -15,8 +15,7 @@ export function UpdateBanner() {
   const { t } = useI18n();
 
   useEffect(() => {
-    // Check after a short delay to not block app startup
-    const timer = setTimeout(async () => {
+    const checkUpdate = async () => {
       try {
         const result = await window.api.checkForUpdate();
         if (result.hasUpdate) {
@@ -25,9 +24,16 @@ export function UpdateBanner() {
       } catch {
         // Silently ignore update check failures
       }
-    }, 3000);
+    };
 
-    return () => clearTimeout(timer);
+    // Check after a short delay, then every 15 minutes
+    const timer = setTimeout(checkUpdate, 3000);
+    const interval = setInterval(checkUpdate, 15 * 60 * 1000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   if (!update || dismissed) return null;

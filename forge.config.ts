@@ -1,5 +1,6 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerZIP } from '@electron-forge/maker-zip';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
@@ -10,10 +11,18 @@ const config: ForgeConfig = {
     name: 'Gemini Desktop',
     appBundleId: 'com.harurow.gemini-desktop',
     icon: 'resources/icon',
+    extraResource: ['resources/README-INSTALL.txt'],
   },
   rebuildConfig: {},
   makers: [
     new MakerZIP({}, ['darwin']),
+    new MakerDMG({
+      name: 'Gemini Desktop',
+      icon: 'resources/icon.icns',
+      additionalDMGOptions: {
+        window: { size: { width: 540, height: 380 } },
+      },
+    }),
   ],
   plugins: [
     new VitePlugin({
