@@ -5,7 +5,7 @@ import { useAppStore } from '../../store/app-store';
 import { useI18n } from '../../i18n';
 
 export function Sidebar() {
-  const { sessions, createSession, deleteSession } = useSessions();
+  const { sessions, deleteSession } = useSessions();
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const setActiveSession = useChatStore((s) => s.setActiveSession);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
@@ -14,11 +14,8 @@ export function Sidebar() {
 
   if (!sidebarOpen) return null;
 
-  const handleNewChat = async () => {
-    const session = await createSession();
-    if (session) {
-      setActiveSession(session.id);
-    }
+  const handleNewChat = () => {
+    setActiveSession(null as unknown as string);
   };
 
   const handleSelectSession = (id: string) => {
