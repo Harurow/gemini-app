@@ -197,11 +197,9 @@ export class GeminiService {
 
       console.log(`[Gemini] Tool calls: ${functionCalls.map((fc) => fc.name).join(', ')}`);
 
-      // Execute tools and build function responses
-      const functionResponses: Part[] = [];
-
-      for (const fc of functionCalls) {
-        const callId = `${fc.name}_${Date.now()}`;
+      // Execute tools in parallel and build function responses
+      const toolPromises = functionCalls.map(async (fc, i) => {
+        const callId = `${fc.name}_${Date.now()}_${i}`;
         onToolCall({ id: callId, name: fc.name, args: fc.args, status: 'running' });
 
         const startTime = Date.now();
@@ -209,14 +207,16 @@ export class GeminiService {
           const result = await toolRegistry.execute(fc.name, fc.args);
           const duration = Date.now() - startTime;
           onToolResult({ id: callId, name: fc.name, result, duration });
-          functionResponses.push({ functionResponse: { name: fc.name, response: { result } } });
+          return { functionResponse: { name: fc.name, response: { result } } } as Part;
         } catch (error: unknown) {
           const duration = Date.now() - startTime;
           const errorMsg = error instanceof Error ? error.message : String(error);
           onToolResult({ id: callId, name: fc.name, result: null, error: errorMsg, duration });
-          functionResponses.push({ functionResponse: { name: fc.name, response: { error: errorMsg } } });
+          return { functionResponse: { name: fc.name, response: { error: errorMsg } } } as Part;
         }
-      }
+      });
+
+      const functionResponses = await Promise.all(toolPromises);
 
       // Add tool responses to conversation history
       const toolResponseContent: Content = { role: 'user', parts: functionResponses };
